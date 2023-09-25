@@ -40,7 +40,13 @@ cache_structure::cache_structure(int cache_size, int assoc, int block_size, int 
 
 void cache_structure::calculate_cache_reqmt(unsigned int address, int *tag_bits_value, int *block_offset_bits_value, int *index_bits_value)
 {
+    //using bit manipulation to calculate binary values of tag, index, and block offset
     block_offset_bits_value = (address >> 0) & (pow(2, blockoffset_num_bits) - 1);
     index_bits_value = (address >> blockoffset_num_bits) & (pow(2, index_num_bits) - 1);
     tag_bits_value = (address >> (index_num_bits + blockoffset_num_bits)) & (pow(2, tag) - 1);
+}
+
+void cache_structure::cache_action_status(unsigned int address, unsigned int *status)
+{
+
 }

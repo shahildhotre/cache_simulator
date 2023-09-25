@@ -25,7 +25,7 @@ class cache_structure
 
     cache_structure(int cache_size, int assoc, int block_size, int cache_level, int number_address_bits);
     void calculate_cache_reqmt(unsigned int address, int *tag_bits_value, int *block_offset_bits_value, int *index_bits_value);
-    void cache_action_status(unsigned int address, unsigned int *array);
+    void cache_action_status(unsigned int address, unsigned int *status);
 };
 
 #endif
