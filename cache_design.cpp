@@ -48,5 +48,16 @@ void cache_structure::calculate_cache_reqmt(unsigned int address, int *tag_bits_
 
 void cache_structure::cache_action_status(unsigned int address, unsigned int *status)
 {
+    // checking if cache hits or misses
+    int hit_status = 0;
+    for (int i =0; i<assoc; i++)
+    {
+        if((cacheContent[index_bit_value][i].valid_bit == true) && (cacheContent[index_bit_value][i].tag == tag_bits_value))
+        {
+            hit_status = 1;
+            status[0] = hit_status;
+        }
+    }
 
+    status[0] = hit_status;
 }
