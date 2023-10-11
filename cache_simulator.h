@@ -8,10 +8,14 @@ typedef struct memory_config{
     unsigned long int block_size;
     unsigned long int size;
     unsigned long int assoc;
-    // unsigned long int l1_block_size;
-    // unsigned long int l2_size;
-    // unsigned long int l2_assoc;
+    unsigned long int l2_size;
+    unsigned long int l2_assoc;
 }memory_config;
+
+typedef struct stream_buffer_config{
+    unsigned int N;   //no.of stream buffers
+    unsigned int M;   //no.of memory blocks in each stream buffer
+}
 
 typedef struct memory_performance_param{
     unsigned long int L1_reads = 0;
@@ -19,11 +23,11 @@ typedef struct memory_performance_param{
     unsigned long int L1_writes = 0;
     unsigned long int L1_write_misses = 0;
     unsigned long int writebacks = 0;
-    // unsigned long int L2_reads = 0;
-    // unsigned long int L2_read_misses = 0;
-    // unsigned long int L2_writes = 0;
-    // unsigned long int L2_write_misses = 0;
-    // unsigned long int writebacks_from_L2_to_MEM = 0;
+    unsigned long int L2_reads = 0;
+    unsigned long int L2_read_misses = 0;
+    unsigned long int L2_writes = 0;
+    unsigned long int L2_write_misses = 0;
+    unsigned long int writebacks_from_L2_to_MEM = 0;
     unsigned long int total_MEM_traffic = 0;
 }memory_performance_param;
 
