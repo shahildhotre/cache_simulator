@@ -37,6 +37,8 @@ int L2set;
 int L2index;
 int L2tagbitscount;
 
+unsigned float L1missrate, L2missrate;
+
 
 int main(int argc , char *argv[])
 {   
@@ -121,6 +123,31 @@ int main(int argc , char *argv[])
     }
         
     //performance mesurement and simulator output
+    L1missrate=float((L1_read_misses + L1_write_misses)/(L1_reads+L1_writes));
+
+    if(L2size!=0)
+    {
+        L2missrate=float((L2_read_misses + L2_write_misses)/(L2_reads+L2_writes));
+    }
+    else
+    {
+        L2missrate=0;
+    }
+
+    if(L2size!=0)
+    {
+        total_MEM_traffic= L2_read_misses + L2_write_misses + writebacks_from_L2_to_MEM;
+    }
+    else
+    {
+        total_MEM_traffic= L1_read_misses + L1_write_misses + writeback_from_L1_to_L2;
+    }
+
+    //simulator output
+    
+    
+        
+
     fclose(fp);
     return 0;
 }
