@@ -1,4 +1,25 @@
-#include "cache_design.h"
+// #include "cache_design.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <vector>
+#include <cmath>
+
+typedef struct cache_content{
+    unsigned long tag = 0;
+    unsigned int lru_counter = 0;
+    bool valid_bit = false;
+    bool dirty_bit = false;
+}cache_content;
+
+
+
+int L1cache_read_request(cache_content L1cache[1000][100], cache_content L2cache[1000][100]);
+int L1cache_write_request(cache_content L1cache[1000][100], cache_content L2cache[1000][100]);
+int L2cache_read_request(cache_content L2cache[1000][100]);
+int L2cache_write_request(cache_content L1cache[1000][100], cache_content L2cache[1000][100], int evicted_block);
+
 
 unsigned int L1_reads = 0;
 unsigned int L1_read_misses = 0;
@@ -17,7 +38,7 @@ unsigned int writebacks_from_L2_to_MEM = 0;
 unsigned int total_MEM_traffic = 0;
 
 char operation;
-unsigned long address;
+unsigned long long address;
 unsigned  long L1tag, L2tag;
 unsigned int L1_indexvalue, L1_offsetvalue, L2_indexvalue, L2_offsetvalue;
 
@@ -37,7 +58,7 @@ int L2set;
 int L2index;
 int L2tagbitscount;
 
-unsigned float L1missrate, L2missrate;
+float L1missrate, L2missrate;
 
 
 int main(int argc , char *argv[])
@@ -144,7 +165,48 @@ int main(int argc , char *argv[])
     }
 
     //simulator output
-    
+
+    printf("===== Simulator configuration =====\n");
+    printf("BLOCKSIZE:             %s\n",argv[1]);
+    printf("L1_SIZE:               %s\n",argv[2]);
+    printf("L1_ASSOC:              %s\n",argv[3]);
+    printf("L2_SIZE:               %s\n",argv[4]);
+    printf("L2_ASSOC:              %s\n",argv[5]);
+    printf("PREF_N:                %s\n",argv[6]);
+    printf("PREF_M:                %s\n",argv[7]);
+    printf("trace_file:            %s\n",argv[8]);
+
+    printf("===== L1 contents =====\n");
+    for(int i=0; i<L1set; i++)
+    {
+        printf("set %2d", i, ":");
+        for(int j=0; j<L1assoc; j++)
+        {
+            printf("%lu",L1cache[i][j].tag);
+        }
+        printf("\n");
+        
+    }
+
+    printf("===== Measurements =====\n");
+    printf("a. L1 reads:                 %d\n",L1_reads);
+    printf("b. L1 read misses:           %d\n",L1_read_misses);
+    printf("c. L1 writes:                %d\n",L1_writes);
+    printf("d. L1 write misses:          %d\n",L1_write_misses);
+    printf("e. L1 miss rate:             %f\n",L1missrate);
+    printf("f. L1 writebacks:            %d\n",writeback_from_L1_to_L2);
+    printf("g. L1 prefetch:              %d\n",0);
+    printf("h. L2 reads (demand):        %d\n",L2_reads);
+    printf("i. L2 read misses (demand):  %d\n",L2_read_misses);
+    printf("j. L2 reads (demand):        %d\n",0);
+    printf("k. L2 read misses (demand):  %d\n",0);
+    printf("l. L2 writes:                %d\n",L2_writes);
+    printf("m. L2 write misses:          %d\n",L2_write_misses);
+    printf("n. L2 miss rate:             %f\n",L2missrate);
+    printf("o. L2 writebacks:            %d\n",writebacks_from_L2_to_MEM);
+    printf("p. L2 prefetches:            %d\n",0);
+    printf("q. total memory traffic:     %d",total_MEM_traffic);
+
     
         
 
