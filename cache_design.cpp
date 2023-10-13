@@ -39,8 +39,8 @@ unsigned int total_MEM_traffic = 0;
 
 char operation;
 unsigned long long address;
-unsigned  long L1tag, L2tag;
-unsigned int L1_indexvalue, L1_offsetvalue, L2_indexvalue, L2_offsetvalue;
+unsigned  long long L1tag, L2tag;
+unsigned long L1_indexvalue, L1_indexvalue1, L1_indexvalue2, L1_offsetvalue, L1_offsetvalue1, L1_offsetvalue2, L2_indexvalue, L2_offsetvalue;
 
 unsigned int blocksize ;
 unsigned int L1size ;
@@ -61,7 +61,7 @@ unsigned int L2tagbitscount;
 
 float L1missrate, L2missrate;
 
-void L2cache_read_request(cache_content L2cache[1000][100])
+void L2cache_read_request(cache_content L2cache[1000][30])
 {
     L2_reads++;
     bool L2hit = false;
@@ -135,7 +135,7 @@ void L2cache_read_request(cache_content L2cache[1000][100])
 
 }
 
-void L2cache_write_request(cache_content L1cache[1000][100], cache_content L2cache[1000][100], int evicted_block)
+void L2cache_write_request(cache_content L1cache[1000][30], cache_content L2cache[1000][30], int evicted_block)
 {
     //get details of evicted block from l1 to l2
 
@@ -224,7 +224,7 @@ void L2cache_write_request(cache_content L1cache[1000][100], cache_content L2cac
     }
 }
 
-void L1cache_read_request(cache_content L1cache[1000][100], cache_content L2cache[1000][100])
+void L1cache_read_request(cache_content L1cache[1000][30], cache_content L2cache[1000][30])
 {
     L1_reads++;
     bool L1hit = false;
@@ -281,13 +281,15 @@ void L1cache_read_request(cache_content L1cache[1000][100], cache_content L2cach
             writeback_from_L1_to_L2++;
             if(L2size != 0)
             {
-                L2cache_write_request(L1cache, L2cache, replace_cache);
+                printf("L2 write");
+                // L2cache_write_request(L1cache, L2cache, replace_cache);
             }
         }
         
         if(L2size != 0)
         {
-            L2cache_read_request(L2cache);
+            printf("L2 read");
+            // L2cache_read_request(L2cache);
         }
 
         L1cache[L1_indexvalue][replace_cache].tag=L1tag;
@@ -303,17 +305,24 @@ void L1cache_read_request(cache_content L1cache[1000][100], cache_content L2cach
         L1cache[L1_indexvalue][replace_cache].lru_counter=0;
 
     }
+    // printf("L1 read done");
 }
 
-void L1cache_write_request(cache_content L1cache[1000][100], cache_content L2cache[1000][100])
+void L1cache_write_request(cache_content L1cache[1000][30], cache_content L2cache[1000][30])
 {
+    // printf("lets start writing\n");
     L1_writes++;
     bool L1hit = false;
 
     for (unsigned int i = 0; i<L1assoc; i++)
     {
+        // printf("checking.....\n");
+        // printf("index_value %lx\n", L1_indexvalue);
+        // printf("checking values %d\n", L1cache[L1_indexvalue][i].valid_bit);
+        // printf("checking values %d\n", L1cache[L1_indexvalue][i].tag);
         if(L1cache[L1_indexvalue][i].valid_bit == true && L1cache[L1_indexvalue][i].tag == L1tag)
         {
+            // printf("its a write hit");
             L1_write_hit++;
             L1hit = true;
             for (unsigned int j = 0; j<L1assoc; j++)
@@ -327,10 +336,15 @@ void L1cache_write_request(cache_content L1cache[1000][100], cache_content L2cac
             L1cache[L1_indexvalue][i].dirty_bit = true;
             break;
         }
+        else{
+            // printf("no cache found\n");
+        }
     }
 
+    // printf("L1hit status %d\n", L1hit);
     if(L1hit == false)
     {
+        // printf("its a write miss \n");
         L1_write_misses++;
         unsigned int count = 0;
         int replace_cache = 0;
@@ -360,16 +374,19 @@ void L1cache_write_request(cache_content L1cache[1000][100], cache_content L2cac
 
         if(L1cache[L1_indexvalue][replace_cache].dirty_bit==true)
         {
+            // printf("in writeback L1");
             writeback_from_L1_to_L2++;
             if(L2size != 0)
             {
-                L2cache_write_request(L1cache, L2cache, replace_cache);
+                printf("L2 write");
+                // L2cache_write_request(L1cache, L2cache, replace_cache);
             }
         }
         
         if(L2size != 0)
         {
-            L2cache_read_request(L2cache);
+            printf("L1 write");
+            // L2cache_read_request(L2cache);
         }
 
         L1cache[L1_indexvalue][replace_cache].tag=L1tag;
@@ -385,6 +402,7 @@ void L1cache_write_request(cache_content L1cache[1000][100], cache_content L2cac
         L1cache[L1_indexvalue][replace_cache].lru_counter=0;
 
     }
+    // printf("L1 write completed");
 }
 
 
@@ -392,6 +410,8 @@ void L1cache_write_request(cache_content L1cache[1000][100], cache_content L2cac
 
 int main(int argc , char *argv[])
 {   
+    // printf("I am in main");
+
     blocksize = atoi(argv[1]);
     L1size = atoi(argv[2]);
     L1assoc = atoi(argv[3]);
@@ -401,16 +421,25 @@ int main(int argc , char *argv[])
     Prefetch_M = atoi(argv[7]);
     trace_file = argv[8];
 
+    printf("===== Simulator configuration =====\n");
+    printf("BLOCK_SIZE:             %s\n",argv[1]);
+    printf("L1_SIZE:               %s\n",argv[2]);
+    printf("L1_ASSOC:              %s\n",argv[3]);
+    printf("L2_SIZE:               %s\n",argv[4]);
+    printf("L2_ASSOC:              %s\n",argv[5]);
+    printf("PREF_N:                %s\n",argv[6]);
+    printf("PREF_M:                %s\n",argv[7]);
+    printf("trace_file:            %s\n",argv[8]);
+
 
     L1set = L1size/(blocksize*L1assoc);
     L1index = log2(L1set);
     blockoffset = log2(blocksize);
     L1tagbitscount = 32 - L1index - blockoffset;
-    L2set = L2size/(blocksize*L2assoc);
-    L2index = log2(L2set);
-    L2tagbitscount = 32 - L2index - blockoffset;
 
-    cache_content L1cache[1000][100];
+
+    
+    cache_content L1cache[1000][30];
     for(unsigned int i = 0;i<L1set ;i++)
         {
             for(unsigned int j=0;j<L1assoc;j++)
@@ -422,9 +451,12 @@ int main(int argc , char *argv[])
             }
         }
 
-    cache_content L2cache[1000][100];
+    cache_content L2cache[1000][30];
     if(L2size != 0)
     {
+        L2set = L2size/(blocksize*L2assoc);
+        L2index = log2(L2set);
+        L2tagbitscount = 32 - L2index - blockoffset;
         for(unsigned int i = 0;i<L2set ;i++)
             {
                 for(unsigned int j=0;j<L2assoc;j++)
@@ -436,6 +468,7 @@ int main(int argc , char *argv[])
                 }
             }
     }
+    // printf("cache created \n");
 
     FILE *fp;
     fp=fopen(trace_file,"r");     //open and read trace file
@@ -444,14 +477,31 @@ int main(int argc , char *argv[])
       printf("Error: Unable to open file %s\n", trace_file);
     }
     fseek(fp,0,SEEK_SET);      //lof file
+    // printf("trace file open\n");
 
-    while(fscanf(fp,"%c %llx\n", &operation, &address)==2)
+    while((fscanf(fp,"%c %llx\n", &operation, &address)==2))
     {
+        
+        // printf("i am in while\n");
+        // printf("operation %c\n", operation);
+        // printf("address %llx\n", address);
+        // printf("values %d\n", L1tagbitscount);
+        // printf("value %d\n", L1index);
+        // printf("value %d\n", blockoffset);
+
         L1tag=address>>(L1index+blockoffset);
-        L1_indexvalue=(address<<L1tagbitscount)>>(L1tagbitscount+blockoffset);
-        L1_offsetvalue=(address<<(L1tagbitscount+L1index))>>(L1tagbitscount+L1index);
+        // printf(" value %llx\n", L1tag);
+        // printf("address %llx\n", address);
+        L1_indexvalue1=(address<<L1tagbitscount);
+        L1_indexvalue2 = (L1tagbitscount+blockoffset);
+        L1_indexvalue=L1_indexvalue1>>L1_indexvalue2;
+        // printf("value %lx\n", L1_indexvalue);
+        L1_offsetvalue1=(address<<(L1tagbitscount+L1index));
+        L1_offsetvalue2= (L1tagbitscount+L1index);
+        L1_offsetvalue = L1_offsetvalue1 >> L1_offsetvalue2;
+        // printf("value %lx\n", L1_offsetvalue);
 
-
+        // printf("L1 contents measured\n");
         if(L2size!=0)
         {
             L2tag=address>>(L2index+blockoffset);
@@ -461,20 +511,23 @@ int main(int argc , char *argv[])
 
         if(operation=='r')
         {
+            // printf("in read\n");
             L1cache_read_request(L1cache, L2cache);
         }   
         else if(operation == 'w')
         {
+            // printf("in write\n");
             L1cache_write_request(L1cache, L2cache);
+            
         }
     }
         
     //performance mesurement and simulator output
-    L1missrate=float((L1_read_misses + L1_write_misses)/(L1_reads+L1_writes));
+    L1missrate=float(((float)L1_read_misses + (float)L1_write_misses)/((float)L1_reads+(float)L1_writes));
 
     if(L2size!=0)
     {
-        L2missrate=float((L2_read_misses + L2_write_misses)/(L2_reads+L2_writes));
+        L2missrate=float(((float)L2_read_misses + (float)L2_write_misses)/((float)L2_reads+(float)L2_writes));
     }
     else
     {
@@ -492,15 +545,7 @@ int main(int argc , char *argv[])
 
     //simulator output
 
-    printf("===== Simulator configuration =====\n");
-    printf("BLOCKSIZE:             %s\n",argv[1]);
-    printf("L1_SIZE:               %s\n",argv[2]);
-    printf("L1_ASSOC:              %s\n",argv[3]);
-    printf("L2_SIZE:               %s\n",argv[4]);
-    printf("L2_ASSOC:              %s\n",argv[5]);
-    printf("PREF_N:                %s\n",argv[6]);
-    printf("PREF_M:                %s\n",argv[7]);
-    printf("trace_file:            %s\n",argv[8]);
+    
 
     printf("===== L1 contents =====\n");
     for(unsigned int i=0; i<L1set; i++)
@@ -508,7 +553,15 @@ int main(int argc , char *argv[])
         printf("set %2d:", i);
         for(unsigned int j=0; j<L1assoc; j++)
         {
-            printf("%lu",L1cache[i][j].tag);
+            if(L1cache[i][j].valid_bit == 1)
+            {
+                printf(" %lx",L1cache[i][j].tag);
+                if(L1cache[i][j].dirty_bit == true)
+                {
+                    printf(" D");
+                }
+            }
+        
         }
         printf("\n");
         
@@ -519,7 +572,7 @@ int main(int argc , char *argv[])
     printf("b. L1 read misses:           %d\n",L1_read_misses);
     printf("c. L1 writes:                %d\n",L1_writes);
     printf("d. L1 write misses:          %d\n",L1_write_misses);
-    printf("e. L1 miss rate:             %f\n",L1missrate);
+    printf("e. L1 miss rate:            %.4f\n",L1missrate);
     printf("f. L1 writebacks:            %d\n",writeback_from_L1_to_L2);
     printf("g. L1 prefetch:              %d\n",0);
     printf("h. L2 reads (demand):        %d\n",L2_reads);
@@ -528,7 +581,7 @@ int main(int argc , char *argv[])
     printf("k. L2 read misses (demand):  %d\n",0);
     printf("l. L2 writes:                %d\n",L2_writes);
     printf("m. L2 write misses:          %d\n",L2_write_misses);
-    printf("n. L2 miss rate:             %f\n",L2missrate);
+    printf("n. L2 miss rate:             %.4f\n",L2missrate);
     printf("o. L2 writebacks:            %d\n",writebacks_from_L2_to_MEM);
     printf("p. L2 prefetches:            %d\n",0);
     printf("q. total memory traffic:     %d",total_MEM_traffic);
