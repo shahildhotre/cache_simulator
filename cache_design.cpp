@@ -62,168 +62,169 @@ unsigned int L2tagbitscount=0;
 
 float L1missrate, L2missrate=0;
 
-// void L2cache_read_request(cache_content L2cache[1000][30])
-// {
-//     L2_reads++;
-//     bool L2hit = false;
+void L2cache_read_request(cache_content L2cache[][32])
+{
+    L2_reads++;
+    bool L2hit = false;
 
-//     for (unsigned int i = 0; i<L2assoc; i++)
-//     {
-//         if(L2cache[L2_indexvalue][i].valid_bit == true && L2cache[L2_indexvalue][i].tag == L2tag)
-//         {
-//             L2_read_hit++;
-//             L2hit = true;
-//             for (unsigned int j = 0; j<L2assoc; j++)
-//             {
-//                 if (L2cache[L2_indexvalue][j].lru_counter < L2cache[L2_indexvalue][i].lru_counter)
-//                 {
-//                     L2cache[L2_indexvalue][j].lru_counter++;
-//                 }
-//             }
-//             L2cache[L2_indexvalue][i].lru_counter = 0;
-//             break;
-//         }
-//     }
+    for (unsigned int i = 0; i<L2assoc; i++)
+    {
+        if(L2cache[L2_indexvalue][i].valid_bit == true && L2cache[L2_indexvalue][i].tag == L2tag)
+        {
+            L2_read_hit++;
+            L2hit = true;
+            for (unsigned int j = 0; j<L2assoc; j++)
+            {
+                if (L2cache[L2_indexvalue][j].lru_counter < L2cache[L2_indexvalue][i].lru_counter)
+                {
+                    L2cache[L2_indexvalue][j].lru_counter++;
+                }
+            }
+            L2cache[L2_indexvalue][i].lru_counter = 0;
+            break;
+        }
+    }
 
-//     if(L2hit == false)
-//     {
-//         L2_read_misses++;
-//         unsigned int count = 0;
-//         int replace_cache = 0;
-//         for(unsigned int i=0; i<L2assoc; i++)
-//         {
-//             if(L2cache[L2_indexvalue][i].valid_bit==true)
-//             {
-//                 count++;
-//             }
-//             else
-//             {
-//                 replace_cache = i;
-//             }
-//         }
+    if(L2hit == false)
+    {
+        L2_read_misses++;
+        unsigned int count = 0;
+        int replace_cache = 0;
+        for(unsigned int i=0; i<L2assoc; i++)
+        {
+            if(L2cache[L2_indexvalue][i].valid_bit==true)
+            {
+                count++;
+            }
+            else
+            {
+                replace_cache = i;
+            }
+        }
 
-//         if(count == L2assoc)
-//         {
-//             //check for LRU cache to find valid_cache to replace
-//             for (unsigned int i = 1; i<L2assoc; i++)
-//             {
-//                 if(L2cache[L2_indexvalue][i].lru_counter==L2assoc-1)
-//                 {
-//                     replace_cache = i;
-//                 }
-//             }
-//         }
+        if(count == L2assoc)
+        {
+            //check for LRU cache to find valid_cache to replace
+            for (unsigned int i = 1; i<L2assoc; i++)
+            {
+                if(L2cache[L2_indexvalue][i].lru_counter==L2assoc-1)
+                {
+                    replace_cache = i;
+                }
+            }
+        }
 
-//         if(L2cache[L2_indexvalue][replace_cache].dirty_bit==true)
-//         {
-//             writebacks_from_L2_to_MEM++;
-//         }
-
-
-//         L2cache[L2_indexvalue][replace_cache].tag=L2tag;
-//         L2cache[L2_indexvalue][replace_cache].dirty_bit=false;
-//         L2cache[L2_indexvalue][replace_cache].valid_bit=true;
-//         for (unsigned int i = 0; i<L2assoc; i++)
-//             {
-//                 if (L2cache[L2_indexvalue][i].lru_counter < L2cache[L2_indexvalue][replace_cache].lru_counter)
-//                 {
-//                     L2cache[L2_indexvalue][i].lru_counter++;
-//                 }
-//             }
-//         L2cache[L2_indexvalue][replace_cache].lru_counter=0;
-
-//     }
-
-// }
-
-// void L2cache_write_request(cache_content L1cache[1000][30], cache_content L2cache[1000][30], int evicted_block)
-// {
-//     //get details of evicted block from l1 to l2
-
-//     unsigned long long evicted_tag, evicted_address;
-//     unsigned long long newL2tag;
-//     unsigned int newL2_indexvalue;
-//     // unsigned int newL2_offsetvalue;
-
-//     evicted_tag = L1cache[L1_indexvalue][evicted_block].tag;
-//     evicted_address =(((evicted_tag<<L1index)|L1_indexvalue)<<blockoffset)|L1_offsetvalue;
-
-//     //convert L1 values of evicted cache to L2
-//     newL2tag=evicted_address>>(L2index+blockoffset);
-//     newL2_indexvalue=(evicted_address<<L2tagbitscount)>>(L2tagbitscount+blockoffset);
-//     // newL2_offsetvalue=(evicted_address<<(L2tagbitscount+L2index))>>(L2tagbitscount+L2index);
-
-//     L2_writes++;
-//     bool L2hit = false;
-
-//     for (unsigned int i = 0; i<L2assoc; i++)
-//     {
-//         if(L2cache[newL2_indexvalue][i].valid_bit == true && L2cache[newL2_indexvalue][i].tag == newL2tag)
-//         {
-//             L2_write_hit++;
-//             L2hit = true;
-//             for (unsigned int j = 0; j<L2assoc; j++)
-//             {
-//                 if (L2cache[newL2_indexvalue][j].lru_counter < L2cache[newL2_indexvalue][i].lru_counter)
-//                 {
-//                     L2cache[newL2_indexvalue][j].lru_counter++;
-//                 }
-//             }
-//             L2cache[newL2_indexvalue][i].lru_counter = 0;
-//             L2cache[newL2_indexvalue][i].dirty_bit = true;
-//             break;
-//         }
-//     }
-
-//     if(L2hit == false)
-//     {
-//         L2_write_misses++;
-//         unsigned int count = 0;
-//         int replace_cache = 0;
-//         for(unsigned int i=0; i<L2assoc; i++)
-//         {
-//             if(L2cache[newL2_indexvalue][i].valid_bit==true)
-//             {
-//                 count++;
-//             }
-//             else
-//             {
-//                 replace_cache = i;
-//             }
-//         }
-
-//         if(count == L2assoc)
-//         {
-//             //check for LRU cache to find valid_cache to replace
-//             for (unsigned int i = 1; i<L2assoc; i++)
-//             {
-//                 if(L2cache[newL2_indexvalue][i].lru_counter==L2assoc-1)
-//                 {
-//                     replace_cache = i;
-//                 }
-//             }
-//         }
-
-//         if(L2cache[newL2_indexvalue][replace_cache].dirty_bit==true)
-//         {
-//             writebacks_from_L2_to_MEM++;
-//         }
+        if(L2cache[L2_indexvalue][replace_cache].dirty_bit==true)
+        {
+            writebacks_from_L2_to_MEM++;
+        }
 
 
-//         L2cache[newL2_indexvalue][replace_cache].tag=L2tag;
-//         L2cache[newL2_indexvalue][replace_cache].dirty_bit=true;
-//         L2cache[newL2_indexvalue][replace_cache].valid_bit=true;
-//         for (unsigned int i = 0; i<L2assoc; i++)
-//             {
-//                 if (L2cache[newL2_indexvalue][i].lru_counter < L2cache[newL2_indexvalue][replace_cache].lru_counter)
-//                 {
-//                     L2cache[newL2_indexvalue][i].lru_counter++;
-//                 }
-//             }
-//         L2cache[newL2_indexvalue][replace_cache].lru_counter=0;
+        L2cache[L2_indexvalue][replace_cache].tag=L2tag;
+        L2cache[L2_indexvalue][replace_cache].dirty_bit=false;
+        L2cache[L2_indexvalue][replace_cache].valid_bit=true;
+        for (unsigned int i = 0; i<L2assoc; i++)
+            {
+                if (L2cache[L2_indexvalue][i].lru_counter < L2cache[L2_indexvalue][replace_cache].lru_counter)
+                {
+                    L2cache[L2_indexvalue][i].lru_counter++;
+                }
+            }
+        L2cache[L2_indexvalue][replace_cache].lru_counter=0;
 
-//     }
-// }
+    }
+
+}
+
+void L2cache_write_request(cache_content L1cache[][32], cache_content L2cache[][32], int evicted_block)
+{
+    //get details of evicted block from l1 to l2
+
+    unsigned long long evicted_tag, evicted_address;
+    unsigned long long newL2tag;
+    unsigned int newL2_indexvalue;
+    // unsigned int newL2_offsetvalue;
+
+    evicted_tag = L1cache[L1_indexvalue][evicted_block].tag;
+    evicted_address =(((evicted_tag<<L1index)|L1_indexvalue)<<blockoffset)|L1_offsetvalue;
+
+    //convert L1 values of evicted cache to L2
+    newL2tag=evicted_address>>(L2index+blockoffset);
+    // newL2_indexvalue=(evicted_address<<L2tagbitscount)>>(L2tagbitscount+blockoffset);
+    newL2_indexvalue = (evicted_address>>blockoffset)%int(pow(2, L2index));
+    // newL2_offsetvalue=(evicted_address<<(L2tagbitscount+L2index))>>(L2tagbitscount+L2index);
+
+    L2_writes++;
+    bool L2hit = false;
+
+    for (unsigned int i = 0; i<L2assoc; i++)
+    {
+        if(L2cache[newL2_indexvalue][i].valid_bit == true && L2cache[newL2_indexvalue][i].tag == newL2tag)
+        {
+            L2_write_hit++;
+            L2hit = true;
+            for (unsigned int j = 0; j<L2assoc; j++)
+            {
+                if (L2cache[newL2_indexvalue][j].lru_counter < L2cache[newL2_indexvalue][i].lru_counter)
+                {
+                    L2cache[newL2_indexvalue][j].lru_counter++;
+                }
+            }
+            L2cache[newL2_indexvalue][i].lru_counter = 0;
+            L2cache[newL2_indexvalue][i].dirty_bit = true;
+            break;
+        }
+    }
+
+    if(L2hit == false)
+    {
+        L2_write_misses++;
+        unsigned int count = 0;
+        int replace_cache = 0;
+        for(unsigned int i=0; i<L2assoc; i++)
+        {
+            if(L2cache[newL2_indexvalue][i].valid_bit==true)
+            {
+                count++;
+            }
+            else
+            {
+                replace_cache = i;
+            }
+        }
+
+        if(count == L2assoc)
+        {
+            //check for LRU cache to find valid_cache to replace
+            for (unsigned int i = 1; i<L2assoc; i++)
+            {
+                if(L2cache[newL2_indexvalue][i].lru_counter==L2assoc-1)
+                {
+                    replace_cache = i;
+                }
+            }
+        }
+
+        if(L2cache[newL2_indexvalue][replace_cache].dirty_bit==true)
+        {
+            writebacks_from_L2_to_MEM++;
+        }
+
+
+        L2cache[newL2_indexvalue][replace_cache].tag=L2tag;
+        L2cache[newL2_indexvalue][replace_cache].dirty_bit=true;
+        L2cache[newL2_indexvalue][replace_cache].valid_bit=true;
+        for (unsigned int i = 0; i<L2assoc; i++)
+            {
+                if (L2cache[newL2_indexvalue][i].lru_counter < L2cache[newL2_indexvalue][replace_cache].lru_counter)
+                {
+                    L2cache[newL2_indexvalue][i].lru_counter++;
+                }
+            }
+        L2cache[newL2_indexvalue][replace_cache].lru_counter=0;
+
+    }
+}
 
 void L1cache_read_request(cache_content L1cache[][32], cache_content L2cache[][32])
 {
@@ -282,15 +283,15 @@ void L1cache_read_request(cache_content L1cache[][32], cache_content L2cache[][3
             writeback_from_L1_to_L2++;
             if(L2size != 0)
             {
-                printf("L2 write");
-                // L2cache_write_request(L1cache, L2cache, replace_cache);
+                // printf("L2 write");
+                L2cache_write_request(L1cache, L2cache, replace_cache);
             }
         }
         
         if(L2size != 0)
         {
-            printf("L2 read");
-            // L2cache_read_request(L2cache);
+            // printf("L2 read");
+            L2cache_read_request(L2cache);
         }
 
         L1cache[L1_indexvalue][replace_cache].tag=L1tag;
@@ -379,15 +380,15 @@ void L1cache_write_request(cache_content L1cache[][32], cache_content L2cache[][
             writeback_from_L1_to_L2++;
             if(L2size != 0)
             {
-                printf("L2 write");
-                // L2cache_write_request(L1cache, L2cache, replace_cache);
+                // printf("L2 write");
+                L2cache_write_request(L1cache, L2cache, replace_cache);
             }
         }
         
         if(L2size != 0)
         {
-            printf("L1 write");
-            // L2cache_read_request(L2cache);
+            // printf("L1 write");
+            L2cache_read_request(L2cache);
         }
 
         L1cache[L1_indexvalue][replace_cache].tag=L1tag;
@@ -498,18 +499,21 @@ int main(int argc , char *argv[])
         L1_indexvalue = (address>>blockoffset)%int(pow(2, L1index));
     
         // printf("value %lx\n", L1_indexvalue);
-        L1_offsetvalue1=(address<<(L1tagbitscount+L1index));
-        L1_offsetvalue2= (L1tagbitscount+L1index);
-        L1_offsetvalue = L1_offsetvalue1 >> L1_offsetvalue2;
+        // L1_offsetvalue1=(address<<(L1tagbitscount+L1index));
+        // L1_offsetvalue2= (L1tagbitscount+L1index);
+        // L1_offsetvalue = L1_offsetvalue1 >> L1_offsetvalue2;
+        L1_offsetvalue = (address)%int(pow(2, blockoffset));
         // printf("value %lx\n", L1_offsetvalue);
 
         // printf("L1 contents measured\n");
-        // if(L2size!=0)
-        // {
-        //     L2tag=address>>(L2index+blockoffset);
-        //     L2_indexvalue=(address<<L2tagbitscount)>>(L2tagbitscount+blockoffset);
-        //     L2_offsetvalue=(address<<(L2tagbitscount+L2index))>>(L2tagbitscount+L2index);
-        // }
+        if(L2size!=0)
+        {
+            L2tag=address>>(L2index+blockoffset);
+            // L2_indexvalue=(address<<L2tagbitscount)>>(L2tagbitscount+blockoffset);
+            L2_indexvalue = (address>>blockoffset)%int(pow(2, L2index));
+            // L2_offsetvalue=(address<<(L2tagbitscount+L2index))>>(L2tagbitscount+L2index);
+            L2_offsetvalue = (address)%int(pow(2, blockoffset));
+        }
 
         if(operation=='r')
         {
@@ -548,7 +552,7 @@ int main(int argc , char *argv[])
     //simulator output
 
     
-    for (int set = 0; set < L1set; ++set) {
+    for (unsigned int set = 0; set < L1set; ++set) {
         std::vector<cache_content> setCacheContent(L1cache[set], L1cache[set] + L1assoc);
         std::sort(setCacheContent.begin(), setCacheContent.end(), compareByLRU);
 
