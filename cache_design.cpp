@@ -602,7 +602,7 @@ int main(int argc , char *argv[])
     trace_file = argv[8];
 
     printf("===== Simulator configuration =====\n");
-    printf("BLOCK_SIZE:             %s\n",argv[1]);
+    printf("BLOCKSIZE:             %s\n",argv[1]);
     printf("L1_SIZE:               %s\n",argv[2]);
     printf("L1_ASSOC:              %s\n",argv[3]);
     printf("L2_SIZE:               %s\n",argv[4]);
@@ -787,7 +787,6 @@ int main(int argc , char *argv[])
     if(L2size!=0)
     {
         L2missrate=float(((float)L2_read_misses)/((float)L1_read_misses + (float)L1_write_misses));
-        printf("L2missrate %f\n", L2missrate);
     }
     else
     {
@@ -838,7 +837,7 @@ int main(int argc , char *argv[])
         printf("\n");
         
     }
-    printf("\n");
+    // printf("\n");
 
     if(L2size !=0)
     {
@@ -851,7 +850,7 @@ int main(int argc , char *argv[])
     }
 
 
-    printf("===== L2 contents =====\n");
+    printf("\n===== L2 contents =====\n");
     for(unsigned int i=0; i<L2set; i++)
     {
 
@@ -875,7 +874,7 @@ int main(int argc , char *argv[])
 
     if(Prefetch_M!=0 && Prefetch_N!=0)
     {
-        printf("===== Stream Buffer(s) contents ====\n");
+        printf("===== Stream Buffer(s) contents =====\n");
         unsigned int count = 0;
         int loop = Prefetch_N;
         while(loop)
@@ -895,6 +894,7 @@ int main(int argc , char *argv[])
             count++;
             loop--;
         }
+        printf("\n");
         
     }
     
@@ -910,10 +910,10 @@ int main(int argc , char *argv[])
     printf("f. L1 writebacks:            %d\n",writeback_from_L1_to_L2);
     if(L2size == 0)
     {
-        printf("g. L1 prefetch:              %d\n",prefetches);
+        printf("g. L1 prefetches:              %d\n",prefetches);
     }
     else{
-        printf("g. L1 prefetch:              %d\n",0);    
+        printf("g. L1 prefetches:              %d\n",0);    
     }
     
     printf("h. L2 reads (demand):        %d\n",L2_reads);
@@ -932,7 +932,7 @@ int main(int argc , char *argv[])
         printf("p. L2 prefetches:            %d\n",0);
     }
     
-    printf("q. total memory traffic:     %d\n",total_MEM_traffic);
+    printf("q. memory traffic:     %d\n",total_MEM_traffic);
 
     
         
@@ -940,4 +940,3 @@ int main(int argc , char *argv[])
     // fclose(fp);
     return 0;
 }
-
